@@ -2,6 +2,7 @@
 {% load crispy_forms_tags %}
 
 {% block formcontent %}
+{% if isAdmin %}
 <h2>Edit User</h2>
 <form method="post">
   {% csrf_token %}
@@ -62,7 +63,7 @@
         var siteSelect = document.getElementById("siteSelect");
         var siteOptions = [
             // Placeholder option
-            '<option value="" disabled selected>Select a Project first</option>'
+            '<option value="" disabled selected>Select a Site</option>'
         ];
 
         // Fetch sites for the selected project using an API endpoint
@@ -82,4 +83,9 @@
     // Initial call to populate site options based on the default selection
     updateSiteOptions();
 </script>
+{% else %}
+    <!-- Content for users who are not authenticated -->
+    <p>You are not Authorized</p>
+{% endif %}
+
 {% endblock %}

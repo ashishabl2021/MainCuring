@@ -2,9 +2,12 @@
 {% load crispy_forms_tags %}
 
 {% block formcontent %}
+{% if isAdmin %}
 <html>
 
 <body>
+  {% if isAdmin %}
+
   <h2>Create a New Site</h2>
   <form method="post">
     {% csrf_token %}
@@ -19,7 +22,7 @@
 
   <h2>All Sites</h2>
 
-  <table class="table">
+  <table class="table table-responsive-sm">
     <thead>
       <tr>
         <th>Site ID</th>
@@ -39,10 +42,17 @@
       {% endfor %}
     </tbody>
   </table>
+  {% else %}
+  <!-- Content for users who are not authenticated -->
+  <p>You are not Authorized</p>
+{% endif %}
 
 </body>
 
 </html>
 
-
+{% else %}
+    <!-- Content for users who are not authenticated -->
+    <p>You are not Authorized</p>
+{% endif %}
 {% endblock %}

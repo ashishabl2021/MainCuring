@@ -8,6 +8,12 @@ from datetime import datetime
 from datetime import timedelta
 from logfile import logdata
 from django.http import JsonResponse
+from django.contrib.auth.decorators import login_required
+
+
+def custom_404_view(request, exception=None):
+    # You can include any additional context data needed for your template here
+    return render(request, 'curingapp/custom_404.html', status=404)
 
 # Create your views here.
 def login_user(request):
@@ -22,15 +28,16 @@ def login_user(request):
             return redirect('home')
         else:
             messages.warning(request,'Something went wrong..! please check input ')
-            return redirect('loginuser')
-        
+            return redirect('loginuser')        
     else:
         return render(request,'curingapp/login.html')
-    
+
+@login_required 
 def logout_user(request):
     logout(request)
     return redirect("loginuser") 
-    
+
+@login_required   
 def home(request):
     if request.user.is_authenticated:
         print('Logged')
@@ -45,9 +52,12 @@ def home(request):
                   'isForm' : True,
                   'isHomePage' : True,
                   'customer_name' : 'Ashoka Buildcon Limited',
+                  'isAdmin':request.user.is_Administrator
                 }
     return render(request, 'curingapp/home.html', variables)
 
+
+@login_required
 def register_user(request):
     custom_users=CustomUser.objects.all()
     if request.method == 'POST':
@@ -72,10 +82,12 @@ def register_user(request):
                 'isForm' : True,
                 'isHomePage' : True,
                 'form':form,
+                'customer_name' : 'Ashoka Buildcon Limited',
                 'custom_users':custom_users,
+                'isAdmin':request.user.is_Administrator,
             }
     return render(request,'curingapp/register_user.html',variables)
-
+@login_required
 def edit_user(request, user_id):
     user = get_object_or_404(CustomUser, User_ID=user_id)
     Projects= Project_Master.objects.all()
@@ -85,13 +97,16 @@ def edit_user(request, user_id):
         form = EditUserForm(request.POST, instance=user)
         if form.is_valid():
             form.save()
-            return redirect('home')  # Redirect to the user list view after editing
+            messages.success(request, 'User Information Update Successfully')
+            return redirect('register_user')  # Redirect to the user list view after editing
     else:
         form = EditUserForm(instance=user)
     variables = { 'page_title': 'Ashoka Buildcon Limited',
                 'username': request.user.get_full_name(), 
                 'isActive' : request.user.is_authenticated,
                 'isSuperUser' : request.user.is_superuser,
+                'isAdmin':request.user.is_Administrator,
+                'customer_name' : 'Ashoka Buildcon Limited',
                 'app_title':'Document Inbox',
                 'isForm' : True,
                 'isHomePage' : True,
@@ -102,6 +117,7 @@ def edit_user(request, user_id):
             }
     return render(request, 'curingapp/edit_user.html', variables)
 
+@login_required
 def change_password(request):
     if request.method == 'POST':
         form = ChangePasswordForm(request.user, request.POST)
@@ -117,8 +133,9 @@ def change_password(request):
                           'isForm' : True,
                           'isHomePage' : True,
                           'customer_name' : 'Ashoka Buildcon Limited',
-                          'successalert' : msg
-                        }            
+                          'successalert' : msg,
+                          'isAdmin':request.user.is_Administrator,
+                        }
             return render(request, 'curingapp/home.html', variables)
         else:
             form = ChangePasswordForm(request.user)
@@ -132,6 +149,7 @@ def change_password(request):
                           'customer_name' : 'Ashoka Buildcon Limited',
                           'successalert' : msg,
                           'form' : form,
+                          'isAdmin':request.user.is_Administrator,
                         }            
             return render(request, 'curingapp/change_password.html', variables)
     else:
@@ -144,11 +162,11 @@ def change_password(request):
                       'isForm' : True,
                       'isHomePage' : True,
                       'customer_name' : 'Ashoka Buildcon Limited',
-                      'form' : form,                     
+                      'form' : form, 
+                      'isAdmin':request.user.is_Administrator,                    
                     }        
-        return render(request, 'curingapp/change_password.html', variables)
-    
-
+        return render(request, 'curingapp/change_password.html', variables)   
+@login_required
 def create_project(request):
     projects = Project_Master.objects.all()
     if request.method == 'POST':
@@ -160,18 +178,19 @@ def create_project(request):
     else:
         form = ProjectForm()
         variables = { 'page_title': 'Ashoka Buildcon Limited',
-                  'username': request.user.get_full_name(), 
-                  'isActive' : request.user.is_authenticated,
-                  'isSuperUser' : request.user.is_superuser,
-                  'app_title':'Document Inbox',
-                  'isForm' : True,
-                  'isHomePage' : True,
-                  'customer_name' : 'Ashoka Buildcon Limited',
-                  'form': form,
-                  'projects':projects,
+                    'username': request.user.get_full_name(), 
+                    'isActive' : request.user.is_authenticated,
+                    'isSuperUser' : request.user.is_superuser,
+                    'app_title':'Document Inbox',
+                    'isForm' : True,
+                    'isHomePage' : True,
+                    'customer_name' : 'Ashoka Buildcon Limited',
+                    'form': form,
+                    'isAdmin':request.user.is_Administrator,
+                    'projects':projects,
                 }
     return render(request, 'curingapp/create_project.html',variables)
-
+@login_required
 def edit_project(request, project_id):
     # Get the project object based on the project_id or return a 404 error if not found
     project = get_object_or_404(Project_Master, Project_ID=project_id)
@@ -199,11 +218,11 @@ def edit_project(request, project_id):
         'customer_name': 'Ashoka Buildcon Limited',
         'form': form,
         'project_id': project_id,  # Pass the project_id to the template
-        
+        'isAdmin':request.user.is_Administrator,
     }
 
     return render(request, 'curingapp/edit_project.html', variables)
-
+@login_required
 def create_site(request):
     sites=Site_Master.objects.all()
     if request.method == 'POST':
@@ -224,9 +243,10 @@ def create_site(request):
                   'customer_name' : 'Ashoka Buildcon Limited',
                   'form': form,
                   'sites':sites,
+                  'isAdmin':request.user.is_Administrator,
                 }
     return render(request, 'curingapp/create_site.html',variables)
-
+@login_required
 def edit_site(request, site_id):
     # Get the site object based on the site_id or return a 404 error if not found
     site = get_object_or_404(Site_Master, Site_ID=site_id)
@@ -256,10 +276,11 @@ def edit_site(request, site_id):
         'customer_name': 'Ashoka Buildcon Limited',
         'form': form,
         'site_id': site_id,  # Pass the site_id to the template
+        'isAdmin':request.user.is_Administrator,
     }
 
     return render(request, 'curingapp/edit_site.html', variables)
-
+@login_required
 def create_structural_element(request):
     structural_elements=Structural_Element.objects.all()
     if request.method == 'POST':
@@ -279,9 +300,10 @@ def create_structural_element(request):
                   'customer_name' : 'Ashoka Buildcon Limited',
                   'form': form,
                   'structural_elements':structural_elements,
+                  'isAdmin':request.user.is_Administrator,
                 }
     return render(request, 'curingapp/create_structural_element.html', variables)
-
+@login_required
 def edit_structural_element(request, element_id):
     element = get_object_or_404(Structural_Element, Structural_Element_ID=element_id)
 
@@ -307,10 +329,11 @@ def edit_structural_element(request, element_id):
         'customer_name': 'Ashoka Buildcon Limited',
         'form': form,
         'element_id': element_id,
+        'isAdmin':request.user.is_Administrator,
     }
 
     return render(request, 'curingapp/edit_element.html', variables)
-
+@login_required
 def create_schedule_curing(request):
     if request.method == 'POST':
         form = TransactionConcretingForm(request.POST)
@@ -376,9 +399,10 @@ def create_schedule_curing(request):
         'form': form,
         'Projects': Projects,
         'Sites': Sites,
+        'isAdmin':request.user.is_Administrator,
     }
     return render(request, 'curingapp/start_schedule.html', variables)
-
+@login_required
 def get_sites_for_project(request, project_id):
     # Retrieve the sites for the selected project
     sites = Site_Master.objects.filter(Project_id=project_id)
@@ -386,7 +410,7 @@ def get_sites_for_project(request, project_id):
     site_data = [{'id': site.Site_ID, 'name': site.Site_Name} for site in sites]
     
     return JsonResponse({'sites': site_data})
-
+@login_required
 def schedule_curing_table(request, transaction_concreting_id):
     schedules = Schedule_Curing.objects.filter(Transaction_Concreting_id=transaction_concreting_id)
     transaction = get_object_or_404(Transaction_Concreting, pk=transaction_concreting_id)
@@ -418,11 +442,13 @@ def schedule_curing_table(request, transaction_concreting_id):
         'form': form,
         'transaction': transaction,
         'schedules': schedules,
-        'transaction_concreting_id': transaction_concreting_id
+        'transaction_concreting_id': transaction_concreting_id,
+        'isAdmin':request.user.is_Administrator,
+
     }
 
     return render(request, 'curingapp/schedule_curing_table.html', variables)
-
+@login_required
 def transaction_concreting_list(request):
     transactions = Transaction_Concreting.objects.filter(User=request.user)
 
@@ -434,14 +460,19 @@ def transaction_concreting_list(request):
                   'isForm' : True,
                   'isHomePage' : True,
                   'customer_name' : 'Ashoka Buildcon Limited',
-                  'transactions': transactions
+                  'transactions': transactions,
+                  'isAdmin':request.user.is_Administrator,
                 }
     return render(request, 'curingapp/transaction_concreting_list.html', variables)
-
-def transaction_detail(request, transaction_pk):
-    transaction = get_object_or_404(Transaction_Concreting, pk=transaction_pk)
-    return render(request, 'curingapp/transaction_detail.html', {'transaction': transaction})
-
+# @login_required
+# def transaction_detail(request, transaction_pk):
+#     transaction = get_object_or_404(Transaction_Concreting, pk=transaction_pk)
+#     variables = {
+#         'transaction': transaction,
+#         'isAdmin':request.user.is_Administrator,
+#     }
+#     return render(request, 'curingapp/transaction_detail.html', variables)
+@login_required
 def upload_image_view(request):
     if request.method == 'POST':
         form = ImageUploadForm(request.POST, request.FILES)

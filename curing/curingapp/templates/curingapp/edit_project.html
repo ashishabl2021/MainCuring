@@ -2,6 +2,8 @@
 {% load crispy_forms_tags %}
 
 {% block formcontent %}
+{% if isAdmin %}
+
 <h2>Edit Project</h2>
 <form method="post">
   {% csrf_token %}
@@ -11,4 +13,10 @@
     <a href="{% url 'home' %}" class="btn btn-primary">Cancel</a>
   </div>
 </form>
+
+
+{% else %}
+    <!-- Content for users who are not authenticated -->
+    <p>You are not Authorized</p>
+{% endif %}
 {% endblock %}

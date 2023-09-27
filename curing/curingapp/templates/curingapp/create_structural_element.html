@@ -1,7 +1,7 @@
 {% extends "curingapp/base.html" %}
 {% load crispy_forms_tags %}
-
 {% block formcontent %}
+{% if isAdmin %}
 <h2>Create a New Structural Element</h2>
 <form method="post">
   {% csrf_token %}
@@ -13,7 +13,7 @@
 <hr>
 
 <h2>All Structural Elements</h2>
-<table class="table">
+<table class="table table-responsive-sm">
   <thead>
     <tr>
       <th>ID</th>
@@ -39,4 +39,9 @@
   </tbody>
 </table>
 
+
+{% else %}
+    <!-- Content for users who are not authenticated -->
+    <p>You are not Authorized</p>
+{% endif %}
 {% endblock %}

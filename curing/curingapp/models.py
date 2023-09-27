@@ -17,7 +17,7 @@ class Site_Master(models.Model):
 
     def __str__(self):
         return self.Site_Name
-    
+
 
 class CustomUser(AbstractUser):
      User_ID = models.AutoField(primary_key=True)
@@ -28,11 +28,9 @@ class CustomUser(AbstractUser):
      Site=models.ForeignKey(Site_Master, on_delete=models.CASCADE)
      is_user = models.BooleanField(default=False)
      is_Administrator = models.BooleanField(default=False)
-     
+
      def __str__(self):
         return self.username
-    
-
 
 class Structural_Element(models.Model):
     Structural_Element_ID = models.AutoField(primary_key=True)

@@ -10,7 +10,6 @@ urlpatterns = [
     path('registeruser/',views.register_user,name='register_user'),
     path('change_password/',views.change_password,name='change_password'),
     path('edit_user/<int:user_id>/', views.edit_user, name='edit_user'),
-
     path('create_schedule_curing/', views.create_schedule_curing, name='create_schedule_curing'),
     path('schedule_curing_table/<int:transaction_concreting_id>/', views.schedule_curing_table, name='schedule_curing_table'),
     path('create_project/', views.create_project, name='create_project'),

@@ -1,7 +1,10 @@
 {% extends "curingapp/base.html" %}
 {% load crispy_forms_tags %}
 
+
+
 {% block formcontent %}
+{% if isAdmin %}
 
 <h2>Create a New Project</h2>
 <form method="post">
@@ -15,7 +18,7 @@
 <hr>
 
 <h2>All Projects</h2>
-<table class="table">
+<table class="table table-responsive-sm">
   <thead>
     <tr>
       <th>Project ID</th>
@@ -34,4 +37,9 @@
   </tbody>
 </table>
 
+
+{% else %}
+    <!-- Content for users who are not authenticated -->
+    <p>You are not Authorized</p>
+{% endif %}
 {% endblock %}
